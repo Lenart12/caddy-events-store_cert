@@ -68,10 +68,10 @@ xcaddy build --with github.com/Lenart12/caddy-events-store_cert
 ## Options
 
 - `bucket_url`: URL of the bucket where certificates will be stored. Supports various storage backends:
-  - Local filesystem: `file:///path/to/directory` or just `/path/to/directory`
-  - S3: `s3://bucket-name`
-  - Google Cloud Storage: `gs://bucket-name`
-  - Azure Blob Storage: `azblob://container-name`
+  - [Local filesystem](https://pkg.go.dev/gocloud.dev@v0.40.0/blob/fileblob#URLOpener): `file:///path/to/directory` or just `/path/to/directory`
+  - [S3](https://pkg.go.dev/gocloud.dev@v0.40.0/blob/s3blob#URLOpener): `s3://bucket-name`
+  - [Google Cloud Storage](https://pkg.go.dev/gocloud.dev@v0.40.0/blob/gcsblob#URLOpener): `gs://bucket-name`
+  - [Azure Blob Storage](https://pkg.go.dev/gocloud.dev@v0.40.0/blob/azureblob#URLOpener): `azblob://container-name`
 
 - `include_cert`: List of certificate identifiers (domains) to include. If empty, all certificates are included.
 
