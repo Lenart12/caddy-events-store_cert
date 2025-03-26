@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -99,25 +98,35 @@ func (eh *Handler) Provision(ctx caddy.Context) error {
 		return errors.Wrap(err, "failed to parse bucket URL")
 	}
 
-	is_local := parsed_url.Scheme == "file" || parsed_url.Scheme == ""
-	if parsed_url.Scheme == "" {
-		eh.BucketURL = "file://" + eh.BucketURL
-	}
+	if parsed_url.Scheme == "file" || parsed_url.Scheme == "" {
+		// Make sure the scheme is set to file
+		parsed_url.Scheme = "file"
 
-	if is_local {
-		eh.BucketURL = strings.TrimPrefix(eh.BucketURL, "file://")
-		// Add a leading ./ to the path if it's not absolute
-		if !strings.HasPrefix(eh.BucketURL, "/") && !strings.HasPrefix(eh.BucketURL, ".") {
-			eh.BucketURL = "./" + eh.BucketURL
+		// Implied relative path
+		if parsed_url.Host == "" && !strings.HasPrefix(parsed_url.Path, "/") && !strings.HasPrefix(parsed_url.Path, ".") {
+			parsed_url.Host = "."
 		}
-		// Make sure the directory exists and is writable
-		if err := os.MkdirAll(eh.BucketURL, 0750); err != nil {
-			return errors.Wrap(err, "failed to create directory")
+
+		query, err := url.ParseQuery(parsed_url.RawQuery)
+		if err != nil {
+			return errors.Wrap(err, "failed to parse bucket url query")
 		}
-		if fi, err := os.Stat(eh.BucketURL); err != nil || !fi.IsDir() {
-			return errors.New("bucket URL is not a directory")
+
+		set_query := func(key, value string) {
+			if !query.Has(key) {
+				query.Set(key, value)
+			}
 		}
-		eh.BucketURL = "file://" + eh.BucketURL
+
+		// Default options for fileblob (can be overridden by query parameters)
+		set_query("create_dir", "true")
+		set_query("dir_file_mode", fmt.Sprint(0o700)) // Must be formatted as decimal
+		set_query("no_tmp_dir", "true")
+		set_query("metadata", "skip")
+		parsed_url.RawQuery = query.Encode()
+
+		eh.BucketURL = parsed_url.String()
+		eh.logger.Debug("Normalized bucket URL", zap.String("bucket_url", eh.BucketURL))
 	}
 
 	bucket, err := blob.OpenBucket(ctx, eh.BucketURL)
