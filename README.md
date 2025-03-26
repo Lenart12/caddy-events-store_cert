@@ -106,7 +106,19 @@ For bucket URL and authentication details, refer to the documentation [here](htt
 ```
 {
   events {
-    on cert_obtained store_cert /path/to/certs mail.example.com imap.example.com
+    on cert_obtained store_cert /path/to/certs foo.example.com bar.example.com
+  }
+}
+```
+
+### Store a certificate for a mail server and restart services
+
+```
+{
+  events {
+    on cert_obtained store_cert /mailcert mail.example.com {
+      after exec ssh caddy-fromdocker@host.lan "sudo systemctl restart postfix dovecot"
+    }
   }
 }
 ```
