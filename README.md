@@ -89,12 +89,6 @@ For cloud storage backends, you need to configure credentials to access the buck
 
 For bucket URL and authentication details, refer to the documentation [here](https://gocloud.dev/howto/blob/#services).
 
-## Local filesystem storage across multiple file systems
-
-> [!IMPORTANT]
-> If trying to use filesystem storage across multiple file systems (such as a mounted folder in a container), make sure to use `?no_tmp_dir=true` at the end of the URL to avoid issues with temporary files.
-> If you avoid this you will get errors like `rename /tmp/...: invalid cross-device link`.
-
 ## Examples
 
 ### Store all certificates to a local directory
@@ -103,16 +97,6 @@ For bucket URL and authentication details, refer to the documentation [here](htt
 {
   events {
     on cert_obtained store_cert /path/to/certs
-  }
-}
-```
-
-### Store all certificates to a local directory, mounted in a container
-
-```
-{
-  events {
-    on cert_obtained store_cert /path/to/certs?no_tmp_dir=true
   }
 }
 ```
