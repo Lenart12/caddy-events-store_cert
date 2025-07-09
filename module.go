@@ -189,7 +189,7 @@ func (eh *Handler) acceptCert(certName string) bool {
 }
 
 // Handle handles the event.
-func (eh *Handler) Handle(ctx context.Context, e caddyevents.Event) error {
+func (eh *Handler) Handle(ctx context.Context, e caddy.Event) error {
 	if e.Name() != "cert_obtained" {
 		eh.logger.Warn("store_cert should only be handled on `cert_obtained`, ignoring", zap.String("event", e.Name()))
 		return nil
